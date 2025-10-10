@@ -81,11 +81,7 @@ async function uploadAvatarDirect({
 
   // 2) Build SIWE message and sign
   const siweMessage = buildSiweMessage({ address, nonce });
-  console.log('siweMessage', siweMessage);
   const siweSignature = await signMessageAsync({ message: siweMessage });
-console.log('//////////////////////');
-console.log(await signMessageAsync({ message: 'Hello World' }));
-console.log('//////////////////////', siweSignature);
   // 3) POST multipart form
   const form = new FormData();
   

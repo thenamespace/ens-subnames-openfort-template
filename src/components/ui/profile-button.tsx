@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState } from 'react'
 import { useAccount, useBalance, useConnect } from 'wagmi'
 import { useIdentity } from '@/hooks/use-identity'
+import { Button } from '@/components/ui/button'
 import { AccountModal } from './account-modal'
 
 export function ProfileButton() {
@@ -47,12 +48,12 @@ export function ProfileButton() {
   // Disconnected state
   if (!isConnected) {
     return (
-      <button
+      <Button
         onClick={() => connect({ connector: connectors[0] })}
-        className="button-primary rounded-full px-6 py-2 font-medium"
+        className="rounded-full px-6"
       >
         Connect Wallet
-      </button>
+      </Button>
     )
   }
 

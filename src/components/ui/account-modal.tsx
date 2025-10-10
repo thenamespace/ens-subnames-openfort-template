@@ -7,6 +7,7 @@ import { useMediaQuery } from '@/hooks/use-media-query'
 import { XIcon, CheckIcon, ClipboardIcon } from 'lucide-react'
 import { useDisconnect } from 'wagmi'
 import { showSuccessToast, showErrorToast } from './custom-toast'
+import { Button } from '@/components/ui/button'
 
 interface AccountModalProps {
   isOpen: boolean
@@ -255,22 +256,22 @@ function AccountView({
       <div className="space-y-3">
         {/* Create Username - only if no username */}
         {!hasSubnames && (
-          <button
+          <Button
             onClick={onCreateUsername}
-            className="w-full button-primary rounded-lg py-2.5 text-sm font-medium"
+            className="w-full rounded-lg py-2.5 text-sm"
           >
             Create Username
-          </button>
+          </Button>
         )}
 
         {/* Upload Avatar - only if has username */}
         {hasSubnames && (
-          <button
+          <Button
             onClick={onUploadAvatar}
-            className="w-full button-primary rounded-lg py-2.5 text-sm font-medium"
+            className="w-full rounded-lg py-2.5 text-sm"
           >
             Upload Avatar
-          </button>
+          </Button>
         )}
 
         {/* Copy Address and Disconnect in 2 columns */}
@@ -399,20 +400,21 @@ function CreateUsernameView({
 
       {/* Actions */}
       <div className="flex gap-3 pt-4">
-        <button
+        <Button
           onClick={onCancel}
-          className="flex-1 px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
+          variant="outline"
+          className="flex-1"
           disabled={isCreating}
         >
           Cancel
-        </button>
-        <button
+        </Button>
+        <Button
           onClick={handleCreate}
           disabled={!canCreate || isCreating}
-          className="flex-1 button-primary rounded-lg py-2 disabled:opacity-50 disabled:cursor-not-allowed"
+          className="flex-1 rounded-lg"
         >
           {isCreating ? 'Creating...' : 'Create'}
-        </button>
+        </Button>
       </div>
     </div>
   )
