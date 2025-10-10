@@ -3,6 +3,7 @@ import React from "react";
 import {
   OpenfortProvider,
   getDefaultConfig,
+  AccountTypeEnum,
 } from "@openfort/react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { WagmiProvider, createConfig } from "wagmi";
@@ -33,6 +34,7 @@ export function Providers({ children }: { children: React.ReactNode }) {
             // If you want to use AUTOMATIC embedded wallet recovery, an encryption session is required.
             // Set this to your recovery endpoint URL from step "3. Set up the recovery endpoint" (e.g., "https://your-domain.com/api/shield-session").
             createEncryptedSessionEndpoint: process.env.NEXT_PUBLIC_CREATE_ENCRYPTED_SESSION_ENDPOINT!,
+            accountType: AccountTypeEnum.EOA,
           }}
         >
           {children}
