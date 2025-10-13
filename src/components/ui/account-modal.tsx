@@ -49,7 +49,8 @@ export function AccountModal({
   subname,
   refetchIdentity,
 }: AccountModalProps) {
-  const { disconnect } = useDisconnect()
+  const { signOut } = useSignOut();
+
   const [currentView, setCurrentView] = useState<ModalView>('account')
   const [copied, setCopied] = useState(false)
   const isMobile = useMediaQuery('(max-width: 639px)')
@@ -76,7 +77,7 @@ export function AccountModal({
   }
 
   const handleDisconnect = () => {
-    disconnect()
+    signOut()
     handleClose()
   }
 
@@ -422,6 +423,7 @@ function CreateUsernameView({
 
 // Upload Avatar View Component
 import { AvatarUpload } from '@/components/ui/avatar-upload'
+import { useSignOut } from '@openfort/react'
 
 function UploadAvatarView({
   subname,

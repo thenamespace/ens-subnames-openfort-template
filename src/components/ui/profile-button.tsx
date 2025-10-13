@@ -1,14 +1,41 @@
 "use client"
 
 import { useEffect, useRef, useState } from 'react'
-import { useAccount, useBalance, useConnect } from 'wagmi'
+import { useBalance } from 'wagmi'
+import { OpenfortButton } from "@openfort/react";
 import { useIdentity } from '@/hooks/use-identity'
-import { Button } from '@/components/ui/button'
 import { AccountModal } from './account-modal'
 
 export function ProfileButton() {
-  const { address, isConnected } = useAccount()
-  const { connect, connectors } = useConnect()
+  return (
+    <OpenfortButton.Custom>
+      {({ isConnected, isConnecting, show, address }) => {
+        return (
+          <ProfileButtonContent
+            isConnected={isConnected}
+            isConnecting={isConnecting}
+            show={show}
+            address={address}
+          />
+        )
+      }}
+    </OpenfortButton.Custom>
+  )
+}
+
+interface ProfileButtonContentProps {
+  isConnected: boolean
+  isConnecting: boolean
+  show?: () => void
+  address?: string
+}
+
+function ProfileButtonContent({ 
+  isConnected,
+  isConnecting, 
+  show,
+  address
+}: ProfileButtonContentProps) {
   const [isModalOpen, setIsModalOpen] = useState(false)
   
   const { 
@@ -48,12 +75,13 @@ export function ProfileButton() {
   // Disconnected state
   if (!isConnected) {
     return (
-      <Button
-        onClick={() => connect({ connector: connectors[0] })}
-        className="rounded-full px-6"
+      <button
+        onClick={show}
+        className="rounded-full px-6 py-2 bg-black text-white hover:bg-gray-800 transition-colors font-medium"
+        disabled={isConnecting}
       >
-        Connect Wallet
-      </Button>
+        {isConnecting ? 'Connecting...' : 'Connect Wallet'}
+      </button>
     )
   }
 
