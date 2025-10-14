@@ -7,12 +7,12 @@ import {
 } from "@openfort/react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { WagmiProvider, createConfig } from "wagmi";
-import { baseSepolia } from "viem/chains";
+import { sepolia } from "viem/chains";
  
 const config = createConfig(
   getDefaultConfig({
-    appName: "Openfort demo",
-    chains: [baseSepolia],
+    appName: "Openfort x Namespace Demo",
+    chains: [sepolia],
     ssr: true,
     walletConnectProjectId: process.env.NEXT_PUBLIC_WALLET_CONNECT_PROJECT_ID!,
   })
@@ -34,7 +34,7 @@ export function Providers({ children }: { children: React.ReactNode }) {
             // If you want to use AUTOMATIC embedded wallet recovery, an encryption session is required.
             // Set this to your recovery endpoint URL from step "3. Set up the recovery endpoint" (e.g., "https://your-domain.com/api/shield-session").
             createEncryptedSessionEndpoint: process.env.NEXT_PUBLIC_CREATE_ENCRYPTED_SESSION_ENDPOINT!,
-            // accountType: AccountTypeEnum.EOA,
+            accountType: AccountTypeEnum.EOA,
           }}
         >
           {children}
