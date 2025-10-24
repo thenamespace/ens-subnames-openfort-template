@@ -13,7 +13,7 @@ A Next.js starter kit demonstrating ENS Offchain Subnames with [Openfort](https:
 ## Get started
 
 ```bash
-npx create-next-app@latest my-project -u https://github.com/thenamespace/ens-subnames-openfort-template
+npx create-next-app@latest my-project -e https://github.com/thenamespace/ens-subnames-openfort-template
 cd my-project
 pnpm install
 ```
