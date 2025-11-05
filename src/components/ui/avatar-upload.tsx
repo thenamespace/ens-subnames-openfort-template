@@ -8,7 +8,8 @@ import { useUploadAvatar } from "@/hooks/use-upload-avatar"
 import { useUpdateEnsAvatar } from "@/hooks/use-update-ens-avatar"
 import { emojiAvatarForAddress } from "@/utils/avatar"
 import { showSuccessToast, showErrorToast } from "@/components/ui/custom-toast"
-import AvatarEditor from 'react-avatar-editor'
+import Cropper, { Area } from 'react-easy-crop'
+import { getCroppedImg } from '@/utils/cropImage'
 
 interface AvatarUploadProps {
   subname: string
@@ -32,11 +33,12 @@ export function AvatarUpload({
   const [croppedPreviewUrl, setCroppedPreviewUrl] = React.useState<string | null>(null)
   const [croppedFile, setCroppedFile] = React.useState<File | null>(null)
   const [cropMode, setCropMode] = React.useState(false)
-  const [scale, setScale] = React.useState(1.2)
-  const [rotate, setRotate] = React.useState(0)
+  const [crop, setCrop] = React.useState({ x: 0, y: 0 })
+  const [zoom, setZoom] = React.useState(1)
+  const [rotation, setRotation] = React.useState(0)
+  const [croppedAreaPixels, setCroppedAreaPixels] = React.useState<Area | null>(null)
   
   const fileInputRef = React.useRef<HTMLInputElement>(null)
-  const editorRef = React.useRef<AvatarEditor>(null)
 
   const { uploadAvatar, isUploading, data, error } = useUploadAvatar()
   const { updateEnsAvatar } = useUpdateEnsAvatar()
@@ -72,8 +74,9 @@ export function AvatarUpload({
     
     // Enter crop mode
     setCropMode(true)
-    setScale(1.2)
-    setRotate(0)
+    setZoom(1.2)
+    setRotation(0)
+    setCrop({ x: 0, y: 0 })
   }
 
   // Handle file selection
@@ -89,8 +92,10 @@ export function AvatarUpload({
     setSelectedFile(null)
     setCroppedFile(null)
     setCropMode(false)
-    setScale(1.2)
-    setRotate(0)
+    setZoom(1.2)
+    setRotation(0)
+    setCrop({ x: 0, y: 0 })
+    setCroppedAreaPixels(null)
     if (previewUrl) {
       URL.revokeObjectURL(previewUrl)
       setPreviewUrl(null)
@@ -104,63 +109,64 @@ export function AvatarUpload({
     }
   }
 
+  // Handle crop completion
+  const onCropComplete = (croppedArea: Area, croppedAreaPixels: Area) => {
+    setCroppedAreaPixels(croppedAreaPixels)
+  }
+
   // Get cropped image as blob
   const getCroppedImage = async (): Promise<File> => {
-    return new Promise((resolve, reject) => {
-      if (!editorRef.current || !selectedFile) {
-        reject(new Error('No image to crop'))
-        return
-      }
+    if (!previewUrl || !croppedAreaPixels || !selectedFile) {
+      throw new Error('No image to crop')
+    }
 
-      const canvas = editorRef.current.getImage()
-      canvas.toBlob((blob: Blob | null) => {
-        if (!blob) {
-          reject(new Error('Failed to create blob'))
-          return
-        }
-        
-        // Create a new File from the blob with the original filename
-        const croppedFile = new File([blob], selectedFile.name, {
-          type: selectedFile.type,
-          lastModified: Date.now(),
-        })
-        resolve(croppedFile)
-      }, selectedFile.type, 0.9)
-    })
+    try {
+      const croppedImageBlob = await getCroppedImg(
+        previewUrl,
+        croppedAreaPixels,
+        rotation,
+        { horizontal: false, vertical: false },
+        selectedFile.type || 'image/png'
+      )
+      
+      // Create a new File from the blob with the original filename
+      const croppedFile = new File([croppedImageBlob], selectedFile.name, {
+        type: selectedFile.type,
+        lastModified: Date.now(),
+      })
+      return croppedFile
+    } catch (error) {
+      throw new Error('Failed to create cropped image')
+    }
   }
 
   // Rotate image
   const handleRotate = () => {
-    setRotate(prev => (prev + 90) % 360)
+    setRotation(prev => (prev + 90) % 360)
   }
 
   // Confirm crop and proceed to upload
   const handleConfirmCrop = async () => {
-    if (!editorRef.current || !selectedFile) return
+    if (!selectedFile || !croppedAreaPixels || !previewUrl) return
 
     try {
       // Get the cropped file for upload
       const croppedFileForUpload = await getCroppedImage()
       setCroppedFile(croppedFileForUpload)
 
-      // Get the cropped canvas and create a preview URL
-      const canvas = editorRef.current.getImage()
-      canvas.toBlob((blob: Blob | null) => {
-        if (blob) {
-          // Clean up previous cropped preview
-          if (croppedPreviewUrl) {
-            URL.revokeObjectURL(croppedPreviewUrl)
-          }
-          
-          // Create new preview URL for the cropped image
-          const croppedUrl = URL.createObjectURL(blob)
-          setCroppedPreviewUrl(croppedUrl)
-        }
-      }, selectedFile.type, 0.9)
+      // Clean up previous cropped preview
+      if (croppedPreviewUrl) {
+        URL.revokeObjectURL(croppedPreviewUrl)
+      }
+      
+      // Create new preview URL for the cropped image
+      const croppedUrl = URL.createObjectURL(croppedFileForUpload)
+      setCroppedPreviewUrl(croppedUrl)
       
       setCropMode(false)
     } catch (err) {
       console.error('Failed to generate crop preview:', err)
+      showErrorToast('Failed to crop image. Please try again.')
       setCropMode(false)
     }
   }
@@ -240,36 +246,44 @@ export function AvatarUpload({
           </div>
           
           {/* Avatar Editor */}
-          <div className="flex justify-center">
-            <AvatarEditor
-              ref={editorRef}
+          <div className="relative w-full h-[300px] bg-gray-100 rounded-lg overflow-hidden">
+            <Cropper
               image={previewUrl}
-              width={200}
-              height={200}
-              border={20}
-              borderRadius={100} // Makes it circular
-              color={[255, 255, 255, 0.6]} // RGBA
-              scale={scale}
-              rotate={rotate}
-              style={{ cursor: 'move' }}
+              crop={crop}
+              zoom={zoom}
+              rotation={rotation}
+              aspect={1}
+              onCropChange={setCrop}
+              onZoomChange={setZoom}
+              onRotationChange={setRotation}
+              onCropComplete={onCropComplete}
+              cropShape="round"
+              showGrid={false}
+              style={{
+                containerStyle: {
+                  width: '100%',
+                  height: '100%',
+                  position: 'relative',
+                },
+              }}
             />
           </div>
 
           {/* Crop Controls */}
           <div className="space-y-3">
-            {/* Scale Control */}
+            {/* Zoom Control */}
             <div>
               <div className="flex items-center justify-between mb-2">
                 <label className="text-xs font-medium text-gray-700">Zoom</label>
-                <span className="text-xs text-gray-500">{scale.toFixed(1)}x</span>
+                <span className="text-xs text-gray-500">{zoom.toFixed(1)}x</span>
               </div>
               <input
                 type="range"
                 min="1"
                 max="3"
                 step="0.1"
-                value={scale}
-                onChange={(e) => setScale(parseFloat(e.target.value))}
+                value={zoom}
+                onChange={(e) => setZoom(parseFloat(e.target.value))}
                 className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-blue-600 hover:bg-gray-300 transition-colors"
               />
             </div>
@@ -374,6 +388,7 @@ export function AvatarUpload({
                   setCroppedPreviewUrl(null)
                 }
                 setCroppedFile(null)
+                setCroppedAreaPixels(null)
                 setCropMode(true)
               }}
               variant="outline"
