@@ -24,7 +24,6 @@ pnpm install
 - An ENS name you control (e.g. `namespace.eth`)
 - Namespace API key from Dev Portal ([https://dev.namespace.ninja](https://dev.namespace.ninja))
 - Openfort account with API keys and Shield keys ([https://dashboard.openfort.io](https://dashboard.openfort.io))
-- WalletConnect Project ID ([https://dashboard.reown.com](https://dashboard.reown.com))
 
 ### Environment variables
 
@@ -43,9 +42,6 @@ SHIELD_ENCRYPTION_SHARE=your_openfort_shield_encryption_share
 # Client recovery endpoint (public; required if using automatic recovery)
 # Example points to Next.js API route in this repo
 NEXT_PUBLIC_CREATE_ENCRYPTED_SESSION_ENDPOINT=/api/shield-session
-
-# WalletConnect (public; required if using WalletConnect)
-NEXT_PUBLIC_WALLET_CONNECT_PROJECT_ID=your_walletconnect_project_id
 
 # ENS name (public; required)
 NEXT_PUBLIC_ENS_NAME=namespace.eth
@@ -76,7 +72,6 @@ Notes:
 
 - Follow the Openfort React Quickstart to obtain keys and configure providers: [Openfort React Quickstart](https://www.openfort.io/docs/products/embedded-wallet/react)
 - Get your Openfort API keys and Shield keys from [https://dashboard.openfort.io](https://dashboard.openfort.io)
-- Get a WalletConnect Project ID from [https://dashboard.reown.com](https://dashboard.reown.com)
 
 This repo wires providers in `src/app/providers.tsx` using `getDefaultConfig` and `OpenfortProvider`.
 
@@ -108,5 +103,4 @@ Open `http://localhost:3000` to see the app.
 - [Openfort React docs](https://www.openfort.io/docs/products/embedded-wallet/react)
 - [GitHub repository](https://github.com/thenamespace/ens-subnames-openfort-template)
 - [Openfort Dashboard](https://dashboard.openfort.io)
-- [WalletConnect (Reown) Dashboard](https://dashboard.reown.com)
 - [Namespace](https://docs.namespace.ninja/)

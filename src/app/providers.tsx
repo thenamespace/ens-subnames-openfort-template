@@ -14,7 +14,6 @@ const config = createConfig(
     appName: "Openfort x Namespace Demo",
     chains: [sepolia],
     ssr: true,
-    walletConnectProjectId: process.env.NEXT_PUBLIC_WALLET_CONNECT_PROJECT_ID!,
   })
 );
  
